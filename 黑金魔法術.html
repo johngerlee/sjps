@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>黑金魔法術｜土地到餐桌到土地循環競賽遊戲</title>
+  <style>
+    :root {
+      --bg1: #fff7dc;
+      --bg2: #d9f7c9;
+      --green: #4caf50;
+      --deep-green: #236d3b;
+      --brown: #8a5a2b;
+      --gold: #f4b942;
+      --orange: #ff8a3d;
+      --red: #e84c3d;
+      --blue: #40a9ff;
+      --card: rgba(255, 255, 255, 0.92);
+      --shadow: 0 12px 28px rgba(60, 80, 40, 0.18);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top left, rgba(255,255,255,0.9), transparent 34%),
+        linear-gradient(135deg, var(--bg1), var(--bg2));
+      color: #23402b;
+      overflow-x: hidden;
+    }
+
+    .app {
+      width: min(1180px, 96vw);
+      margin: 0 auto;
+      padding: 20px 0 28px;
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 18px;
+      align-items: stretch;
+      margin-bottom: 16px;
+    }
+
+    .hero, .scoreboard, .game-panel, .knowledge-card, .rank-card {
+      background: var(--card);
+      border: 3px solid rgba(76, 175, 80, 0.18);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+    }
+
+    .hero {
+      padding: 22px 26px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: "🌱";
+      position: absolute;
+      right: 24px;
+      bottom: -20px;
+      font-size: 110px;
+      opacity: 0.18;
+      transform: rotate(-8deg);
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(32px, 5vw, 58px);
+      line-height: 1.05;
+      color: var(--deep-green);
+      letter-spacing: 1px;
+    }
+
+    .subtitle {
+      margin: 0;
+      font-size: clamp(17px, 2.2vw, 24px);
+      font-weight: 700;
+      color: #5b6f35;
+    }
+
+    .tagline {
+      margin-top: 10px;
+      font-size: 18px;
+      line-height: 1.55;
+    }
+
+    .scoreboard {
+      padding: 18px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .score-box {
+      border-radius: 20px;
+      background: linear-gradient(180deg, #ffffff, #f2ffe9);
+      border: 2px solid rgba(76,175,80,0.18);
+      padding: 12px;
+      text-align: center;
+    }
+
+    .score-label {
+      display: block;
+      font-weight: 800;
+      color: #607248;
+      font-size: 15px;
+    }
+
+    .score-value {
+      display: block;
+      margin-top: 4px;
+      font-size: 32px;
+      font-weight: 1000;
+      color: var(--deep-green);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 18px;
+    }
+
+    .game-panel {
+      padding: 18px;
+      min-height: 650px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stage-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .level-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #e8f8df;
+      color: var(--deep-green);
+      border: 2px solid #bce8a5;
+      border-radius: 999px;
+      padding: 9px 15px;
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    .timer-wrap {
+      flex: 1;
+      min-width: 220px;
+      max-width: 360px;
+      background: #fff4cf;
+      border-radius: 999px;
+      border: 2px solid #f6d878;
+      height: 26px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .timer-bar {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, #48c774, #f4c542, #ff7043);
+      transition: width 0.25s linear;
+    }
+
+    .timer-text {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      font-weight: 1000;
+      font-size: 14px;
+      color: #5a431d;
+    }
+
+    .mission {
+      background: linear-gradient(135deg, #f0fff0, #fff7d6);
+      border-radius: 24px;
+      border: 3px dashed rgba(76, 175, 80, 0.35);
+      padding: 16px 18px;
+      margin-bottom: 16px;
+    }
+
+    .mission-title {
+      font-size: 28px;
+      margin: 0 0 8px;
+      color: var(--deep-green);
+    }
+
+    .mission-text {
+      margin: 0;
+      font-size: 20px;
+      line-height: 1.55;
+      font-weight: 700;
+    }
+
+    .cycle-road {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .cycle-step {
+      min-height: 86px;
+      background: #ffffff;
+      border: 2px solid #d8ebc7;
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 8px 5px;
+      font-weight: 1000;
+      color: #54703b;
+      position: relative;
+      transition: transform 0.2s, background 0.2s, border 0.2s;
+    }
+
+    .cycle-step .icon { font-size: 30px; display: block; }
+    .cycle-step.active {
+      transform: translateY(-5px) scale(1.03);
+      background: #e4ffd8;
+      border-color: var(--green);
+      color: var(--deep-green);
+      box-shadow: 0 8px 16px rgba(76, 175, 80, 0.18);
+    }
+    .cycle-step.done {
+      background: #fff5c4;
+      border-color: var(--gold);
+    }
+
+    .play-area {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    .choices {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .choice-btn {
+      min-height: 118px;
+      border: 0;
+      border-radius: 24px;
+      background: linear-gradient(180deg, #ffffff, #f5ffe8);
+      box-shadow: 0 8px 0 #c8dfb4, 0 12px 18px rgba(0,0,0,0.08);
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 19px;
+      font-weight: 1000;
+      color: #2f5735;
+      padding: 12px;
+      transition: transform 0.08s, box-shadow 0.08s, filter 0.15s;
+    }
+
+    .choice-btn:hover { filter: brightness(1.03); transform: translateY(-2px); }
+    .choice-btn:active { transform: translateY(5px); box-shadow: 0 3px 0 #c8dfb4; }
+    .choice-btn .big-icon { display: block; font-size: 42px; margin-bottom: 6px; }
+    .choice-btn.correct { animation: pop 0.35s ease; background: linear-gradient(180deg, #e7ffdc, #d1ffc0); }
+    .choice-btn.wrong { animation: shake 0.32s ease; background: linear-gradient(180deg, #ffe7e1, #ffd1c6); }
+
+    .drag-zone {
+      display: none;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .item-bank, .drop-bank {
+      background: #fffdf4;
+      border-radius: 24px;
+      border: 2px solid #eadcaa;
+      padding: 14px;
+      min-height: 250px;
+    }
+
+    .section-title {
+      margin: 0 0 10px;
+      font-size: 22px;
+      color: #684a23;
+    }
+
+    .draggable-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .drag-item {
+      user-select: none;
+      cursor: grab;
+      border-radius: 999px;
+      padding: 10px 13px;
+      background: #ffffff;
+      border: 2px solid #d6e5c8;
+      font-size: 18px;
+      font-weight: 900;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+    }
+
+    .drop-box {
+      border-radius: 20px;
+      border: 3px dashed #b9dca5;
+      background: #f3ffe9;
+      min-height: 85px;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+
+    .drop-title {
+      font-size: 18px;
+      font-weight: 1000;
+      color: var(--deep-green);
+      margin-bottom: 8px;
+    }
+
+    .drop-box.over { background: #fff3c3; border-color: var(--gold); }
+
+    .message-box {
+      min-height: 90px;
+      border-radius: 24px;
+      padding: 14px 16px;
+      background: #ffffff;
+      border: 2px solid #dcefd1;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 20px;
+      font-weight: 800;
+      line-height: 1.45;
+    }
+
+    .guide-face {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: linear-gradient(180deg, #3c9b49, #236d3b);
+      display: grid;
+      place-items: center;
+      color: white;
+      font-size: 34px;
+      flex: 0 0 auto;
+      box-shadow: inset 0 -6px rgba(0,0,0,0.12);
+    }
+
+    .action-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    .main-btn, .ghost-btn {
+      border: 0;
+      border-radius: 999px;
+      padding: 13px 20px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 18px;
+      font-weight: 1000;
+      transition: transform 0.1s, filter 0.15s;
+    }
+
+    .main-btn {
+      background: linear-gradient(180deg, #52c65f, #2e8b42);
+      color: white;
+      box-shadow: 0 7px 0 #1e6331;
+    }
+
+    .ghost-btn {
+      background: #fff8db;
+      color: #684a23;
+      border: 2px solid #f1d26e;
+      box-shadow: 0 7px 0 #d4b854;
+    }
+
+    .main-btn:active, .ghost-btn:active { transform: translateY(5px); box-shadow: 0 2px 0 rgba(0,0,0,0.25); }
+
+    .side {
+      display: grid;
+      gap: 18px;
+      align-content: start;
+    }
+
+    .knowledge-card, .rank-card {
+      padding: 18px;
+    }
+
+    .knowledge-card h2, .rank-card h2 {
+      margin: 0 0 12px;
+      color: var(--deep-green);
+      font-size: 26px;
+    }
+
+    .knowledge-list {
+      padding-left: 20px;
+      margin: 0;
+      font-size: 17px;
+      line-height: 1.75;
+      font-weight: 700;
+    }
+
+    .badge-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .badge {
+      text-align: center;
+      border-radius: 18px;
+      background: #f5f5f5;
+      border: 2px solid #e0e0e0;
+      padding: 10px 4px;
+      font-weight: 1000;
+      color: #999;
+    }
+
+    .badge.earned {
+      background: #fff1b8;
+      border-color: #f4c542;
+      color: #795400;
+      animation: pop 0.4s ease;
+    }
+
+    .rank-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .rank-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f6ffe9;
+      border-radius: 16px;
+      padding: 10px 12px;
+      font-size: 17px;
+      font-weight: 1000;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(24, 49, 26, 0.68);
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      z-index: 20;
+    }
+
+    .modal-card {
+      width: min(720px, 96vw);
+      background: white;
+      border-radius: 32px;
+      padding: 28px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.28);
+      text-align: center;
+      border: 6px solid #c8efad;
+    }
+
+    .modal-card h2 {
+      font-size: clamp(34px, 5vw, 56px);
+      margin: 0 0 12px;
+      color: var(--deep-green);
+    }
+
+    .modal-card p {
+      font-size: 21px;
+      line-height: 1.65;
+      font-weight: 700;
+    }
+
+    .name-input {
+      width: min(420px, 90%);
+      border-radius: 18px;
+      border: 3px solid #b7df9b;
+      padding: 14px 18px;
+      font-size: 22px;
+      text-align: center;
+      font-weight: 900;
+      outline: none;
+      margin-bottom: 12px;
+    }
+
+    .hidden { display: none !important; }
+
+    .floating-score {
+      position: fixed;
+      pointer-events: none;
+      z-index: 30;
+      font-weight: 1000;
+      font-size: 32px;
+      color: var(--orange);
+      animation: floatUp 0.8s ease forwards;
+      text-shadow: 0 2px white;
+    }
+
+    .confetti {
+      position: fixed;
+      top: -20px;
+      font-size: 28px;
+      pointer-events: none;
+      z-index: 40;
+      animation: fall 1.8s linear forwards;
+    }
+
+    @keyframes pop {
+      0% { transform: scale(1); }
+      45% { transform: scale(1.08); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-8px); }
+      75% { transform: translateX(8px); }
+    }
+
+    @keyframes floatUp {
+      from { opacity: 1; transform: translateY(0) scale(1); }
+      to { opacity: 0; transform: translateY(-70px) scale(1.3); }
+    }
+
+    @keyframes fall {
+      to { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+    }
+
+    @media (max-width: 920px) {
+      header, .layout { grid-template-columns: 1fr; }
+      .cycle-road { grid-template-columns: repeat(4, 1fr); }
+      .choices { grid-template-columns: 1fr 1fr; }
+      .drag-zone { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 560px) {
+      .scoreboard { grid-template-columns: repeat(2, 1fr); }
+      .choices { grid-template-columns: 1fr; }
+      .cycle-road { grid-template-columns: repeat(2, 1fr); }
+      .choice-btn { min-height: 96px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <section class="hero">
+        <h1>黑金魔法術</h1>
+        <p class="subtitle">土地到餐桌到土地｜永續食物循環競賽遊戲</p>
+        <p class="tagline">完成「土地 → 菜園 → 食材 → 餐桌 → 生廚餘 → 堆肥 → 土地」七大任務，收集黑金能量，成為校園永續魔法師！</p>
+      </section>
+
+      <section class="scoreboard" aria-label="遊戲分數看板">
+        <div class="score-box"><span class="score-label">分數</span><span id="score" class="score-value">0</span></div>
+        <div class="score-box"><span class="score-label">連擊</span><span id="combo" class="score-value">0</span></div>
+        <div class="score-box"><span class="score-label">黑金能量</span><span id="energy" class="score-value">0</span></div>
+        <div class="score-box"><span class="score-label">剩餘生命</span><span id="lives" class="score-value">❤️❤️❤️</span></div>
+      </section>
+    </header>
+
+    <main class="layout">
+      <section class="game-panel">
+        <div class="stage-top">
+          <div id="levelPill" class="level-pill">第 1 關｜土地</div>
+          <div class="timer-wrap" aria-label="倒數計時">
+            <div id="timerBar" class="timer-bar"></div>
+            <div id="timerText" class="timer-text">30 秒</div>
+          </div>
+        </div>
+
+        <section class="mission">
+          <h2 id="missionTitle" class="mission-title">準備開始</h2>
+          <p id="missionText" class="mission-text">請按下開始，進入黑金魔法挑戰。</p>
+        </section>
+
+        <section class="cycle-road" id="cycleRoad" aria-label="食物循環流程">
+          <div class="cycle-step active"><span class="icon">🌍</span>土地</div>
+          <div class="cycle-step"><span class="icon">🥬</span>菜園</div>
+          <div class="cycle-step"><span class="icon">🥕</span>食材</div>
+          <div class="cycle-step"><span class="icon">🍽️</span>餐桌</div>
+          <div class="cycle-step"><span class="icon">🍌</span>生廚餘</div>
+          <div class="cycle-step"><span class="icon">🪱</span>堆肥</div>
+          <div class="cycle-step"><span class="icon">🌱</span>回到土地</div>
+        </section>
+
+        <section class="play-area">
+          <div id="choices" class="choices"></div>
+
+          <div id="dragZone" class="drag-zone">
+            <div class="item-bank">
+              <h3 class="section-title">拖曳材料</h3>
+              <div id="draggableList" class="draggable-list"></div>
+            </div>
+            <div class="drop-bank">
+              <h3 class="section-title">放到正確桶子</h3>
+              <div id="greenDrop" class="drop-box" data-kind="green"><div class="drop-title">🟢 生廚餘桶：果皮、菜葉、茶葉渣</div></div>
+              <div id="brownDrop" class="drop-box" data-kind="brown"><div class="drop-title">🟤 碳材料桶：枯葉、碎枝、紙類</div></div>
+            </div>
+          </div>
+
+          <div class="message-box">
+            <div class="guide-face">🧙</div>
+            <div id="message">歡迎來到黑金魔法術！你的任務是讓食物循環回到土地，變成新的生命能量。</div>
+          </div>
+
+          <div class="action-row">
+            <button id="startBtn" class="main-btn">開始挑戰</button>
+            <button id="nextBtn" class="main-btn hidden">下一關</button>
+            <button id="restartBtn" class="ghost-btn">重新開始</button>
+          </div>
+        </section>
+      </section>
+
+      <aside class="side">
+        <section class="knowledge-card">
+          <h2>任務祕笈</h2>
+          <ol class="knowledge-list">
+            <li>土地健康，蔬菜才長得好。</li>
+            <li>菜園需要陽光、水、空氣與照顧。</li>
+            <li>食材要珍惜，避免浪費。</li>
+            <li>餐桌剩食要減量，吃多少拿多少。</li>
+            <li>生廚餘要瀝乾、切小、分類。</li>
+            <li>堆肥要混合生廚餘與枯葉，保持通氣。</li>
+            <li>熟成堆肥像黑金，可回到土地。</li>
+          </ol>
+          <div class="badge-grid">
+            <div id="badge1" class="badge">🌍 土地</div>
+            <div id="badge2" class="badge">🥬 菜園</div>
+            <div id="badge3" class="badge">🍽️ 餐桌</div>
+            <div id="badge4" class="badge">🍌 分類</div>
+            <div id="badge5" class="badge">🪱 堆肥</div>
+            <div id="badge6" class="badge">🏆 魔法師</div>
+          </div>
+        </section>
+
+        <section class="rank-card">
+          <h2>本機排行榜</h2>
+          <div id="rankList" class="rank-list"></div>
+        </section>
+      </aside>
+    </main>
+  </div>
+
+  <div id="startModal" class="modal">
+    <div class="modal-card">
+      <h2>🪄 黑金魔法術</h2>
+      <p>請輸入你的魔法師名字，開始挑戰七關食物循環任務。答對越快、連擊越多，分數越高！</p>
+      <input id="playerName" class="name-input" maxlength="8" placeholder="例如：小農夫阿綠" />
+      <br />
+      <button id="modalStart" class="main-btn">進入遊戲</button>
+    </div>
+  </div>
+
+  <div id="endModal" class="modal hidden">
+    <div class="modal-card">
+      <h2 id="endTitle">挑戰完成！</h2>
+      <p id="endSummary"></p>
+      <button id="playAgain" class="main-btn">再玩一次</button>
+    </div>
+  </div>
+
+  <script>
+    const levels = [
+      {
+        name: "土地",
+        icon: "🌍",
+        type: "choice",
+        title: "第 1 關：喚醒健康土地",
+        text: "想讓菜園長出健康蔬菜，土地最需要什麼？",
+        knowledge: "健康的土地需要有機質、空氣、水分和許多小生物。",
+        choices: [
+          { icon: "🪱", text: "加入熟成堆肥，增加有機質", correct: true },
+          { icon: "🧴", text: "每天倒清潔劑，讓泥土香香的", correct: false },
+          { icon: "🪨", text: "把土壓得越硬越好", correct: false }
+        ]
+      },
+      {
+        name: "菜園",
+        icon: "🥬",
+        type: "choice",
+        title: "第 2 關：照顧校園菜園",
+        text: "菜園裡的蔬菜正在長大，哪一個照顧方式最永續？",
+        knowledge: "菜園管理要觀察植物需求，適量澆水，並善用自然資材。",
+        choices: [
+          { icon: "💧", text: "觀察土壤濕度，適量澆水", correct: true },
+          { icon: "🚿", text: "不管天氣如何，一直大量澆水", correct: false },
+          { icon: "🧪", text: "看到蟲就大量噴藥", correct: false }
+        ]
+      },
+      {
+        name: "食材",
+        icon: "🥕",
+        type: "choice",
+        title: "第 3 關：珍惜新鮮食材",
+        text: "採收後的食材要怎麼處理，才能減少浪費？",
+        knowledge: "食材從土地而來，清洗、保存、分配都要珍惜。",
+        choices: [
+          { icon: "🧺", text: "先整理可食用部分，依需求分配", correct: true },
+          { icon: "🗑️", text: "外形不完美就全部丟掉", correct: false },
+          { icon: "☀️", text: "放在大太陽下曬一整天", correct: false }
+        ]
+      },
+      {
+        name: "餐桌",
+        icon: "🍽️",
+        type: "choice",
+        title: "第 4 關：餐桌不浪費挑戰",
+        text: "午餐時間，哪一個行動最符合惜食精神？",
+        knowledge: "吃多少拿多少，先少量、不夠再添，可以降低剩食。",
+        choices: [
+          { icon: "🥣", text: "先盛適量，不夠再加", correct: true },
+          { icon: "😆", text: "故意盛滿，再和同學比誰剩最多", correct: false },
+          { icon: "🙈", text: "不喜歡的菜直接藏起來", correct: false }
+        ]
+      },
+      {
+        name: "生廚餘",
+        icon: "🍌",
+        type: "drag",
+        title: "第 5 關：生廚餘分類魔法",
+        text: "把材料拖進正確桶子：生廚餘桶或碳材料桶。全部分對才過關！",
+        knowledge: "堆肥需要含氮的生廚餘，也需要含碳的枯葉碎枝來平衡水分與氣味。",
+        items: [
+          { text: "香蕉皮", kind: "green" },
+          { text: "青菜葉", kind: "green" },
+          { text: "蘋果皮", kind: "green" },
+          { text: "茶葉渣", kind: "green" },
+          { text: "枯葉", kind: "brown" },
+          { text: "碎樹枝", kind: "brown" },
+          { text: "未上膜紙盒碎片", kind: "brown" },
+          { text: "乾草", kind: "brown" }
+        ]
+      },
+      {
+        name: "堆肥",
+        icon: "🪱",
+        type: "choice",
+        title: "第 6 關：黑金配方大考驗",
+        text: "堆肥桶太濕、開始有臭味時，應該怎麼補救？",
+        knowledge: "廚餘太濕容易發臭，加入枯葉、碎枝並翻動通氣，可幫助分解。",
+        choices: [
+          { icon: "🍂", text: "加入枯葉碎枝，並翻動通氣", correct: true },
+          { icon: "💦", text: "再倒很多水，讓它更濕", correct: false },
+          { icon: "🔒", text: "把桶子密封，完全不讓空氣進去", correct: false }
+        ]
+      },
+      {
+        name: "回到土地",
+        icon: "🌱",
+        type: "choice",
+        title: "第 7 關：黑金回歸土地",
+        text: "熟成堆肥變成深色、鬆軟、像泥土的黑金後，可以怎麼做？",
+        knowledge: "熟成堆肥可以回到土地，改善土壤，支持下一輪蔬菜生長。",
+        choices: [
+          { icon: "🌱", text: "撒回菜園土裡，開始新的循環", correct: true },
+          { icon: "🚮", text: "當成垃圾全部丟掉", correct: false },
+          { icon: "🍽️", text: "直接拿來吃", correct: false }
+        ]
+      }
+    ];
+
+    const state = {
+      player: "小魔法師",
+      level: 0,
+      score: 0,
+      combo: 0,
+      energy: 0,
+      lives: 3,
+      time: 30,
+      timer: null,
+      running: false,
+      answered: false,
+      dragCorrect: 0,
+      dragTotal: 0
+    };
+
+    const $ = (id) => document.getElementById(id);
+    const scoreEl = $("score");
+    const comboEl = $("combo");
+    const energyEl = $("energy");
+    const livesEl = $("lives");
+    const levelPill = $("levelPill");
+    const timerBar = $("timerBar");
+    const timerText = $("timerText");
+    const missionTitle = $("missionTitle");
+    const missionText = $("missionText");
+    const choicesEl = $("choices");
+    const dragZone = $("dragZone");
+    const draggableList = $("draggableList");
+    const messageEl = $("message");
+    const nextBtn = $("nextBtn");
+    const startBtn = $("startBtn");
+    const restartBtn = $("restartBtn");
+    const cycleSteps = [...document.querySelectorAll(".cycle-step")];
+
+    function shuffle(array) {
+      return [...array].sort(() => Math.random() - 0.5);
+    }
+
+    function updateUI() {
+      scoreEl.textContent = state.score;
+      comboEl.textContent = state.combo;
+      energyEl.textContent = state.energy;
+      livesEl.textContent = "❤️".repeat(state.lives) || "💔";
+      timerText.textContent = `${state.time} 秒`;
+      timerBar.style.width = `${Math.max(0, state.time / 30 * 100)}%`;
+
+      cycleSteps.forEach((step, index) => {
+        step.classList.toggle("active", index === state.level);
+        step.classList.toggle("done", index < state.level);
+      });
+
+      for (let i = 1; i <= 5; i++) {
+        const badge = $(`badge${i}`);
+        badge.classList.toggle("earned", state.level >= i);
+      }
+      $("badge6").classList.toggle("earned", state.level >= levels.length - 1 && state.energy >= 7);
+    }
+
+    function setMessage(text, mood = "🧙") {
+      document.querySelector(".guide-face").textContent = mood;
+      messageEl.textContent = text;
+    }
+
+    function startTimer() {
+      clearInterval(state.timer);
+      state.time = 30;
+      updateUI();
+      state.timer = setInterval(() => {
+        if (!state.running || state.answered) return;
+        state.time -= 1;
+        updateUI();
+        if (state.time <= 0) {
+          clearInterval(state.timer);
+          handleWrong(null, "時間到！永續魔法需要快又準。生命扣 1 顆，請再試一次。", true);
+        }
+      }, 1000);
+    }
+
+    function renderLevel() {
+      const level = levels[state.level];
+      state.answered = false;
+      state.running = true;
+      state.dragCorrect = 0;
+      state.dragTotal = level.items ? level.items.length : 0;
+
+      levelPill.textContent = `第 ${state.level + 1} 關｜${level.name}`;
+      missionTitle.textContent = `${level.icon} ${level.title}`;
+      missionText.textContent = level.text;
+      choicesEl.innerHTML = "";
+      draggableList.innerHTML = "";
+      dragZone.style.display = "none";
+      choicesEl.style.display = "grid";
+      nextBtn.classList.add("hidden");
+      startBtn.classList.add("hidden");
+
+      if (level.type === "choice") renderChoices(level);
+      if (level.type === "drag") renderDrag(level);
+
+      setMessage("讀完任務後開始行動！答對越快，時間加成越高。", "🧙");
+      updateUI();
+      startTimer();
+    }
+
+    function renderChoices(level) {
+      shuffle(level.choices).forEach((choice) => {
+        const btn = document.createElement("button");
+        btn.className = "choice-btn";
+        btn.innerHTML = `<span class="big-icon">${choice.icon}</span>${choice.text}`;
+        btn.addEventListener("click", (event) => {
+          if (state.answered) return;
+          if (choice.correct) handleCorrect(event.currentTarget, level.knowledge);
+          else handleWrong(event.currentTarget, "這不是最永續的做法喔！想想怎樣才能讓資源回到土地。", false);
+        });
+        choicesEl.appendChild(btn);
+      });
+    }
+
+    function renderDrag(level) {
+      choicesEl.style.display = "none";
+      dragZone.style.display = "grid";
+      [$("greenDrop"), $("brownDrop")].forEach((box) => {
+        [...box.querySelectorAll(".drag-item")].forEach(n => n.remove());
+        box.addEventListener("dragover", dragOver);
+        box.addEventListener("dragleave", dragLeave);
+        box.addEventListener("drop", dropItem);
+      });
+
+      shuffle(level.items).forEach((item, index) => {
+        const chip = document.createElement("div");
+        chip.className = "drag-item";
+        chip.draggable = true;
+        chip.id = `drag-${index}`;
+        chip.dataset.kind = item.kind;
+        chip.textContent = item.text;
+        chip.addEventListener("dragstart", (event) => {
+          event.dataTransfer.setData("text/plain", chip.id);
+        });
+        draggableList.appendChild(chip);
+      });
+    }
+
+    function dragOver(event) {
+      event.preventDefault();
+      event.currentTarget.classList.add("over");
+    }
+
+    function dragLeave(event) {
+      event.currentTarget.classList.remove("over");
+    }
+
+    function dropItem(event) {
+      event.preventDefault();
+      const box = event.currentTarget;
+      box.classList.remove("over");
+      if (state.answered) return;
+      const id = event.dataTransfer.getData("text/plain");
+      const item = document.getElementById(id);
+      if (!item) return;
+
+      if (item.dataset.kind === box.dataset.kind) {
+        box.appendChild(item);
+        item.draggable = false;
+        item.style.cursor = "default";
+        item.style.background = "#e6ffd9";
+        state.dragCorrect += 1;
+        state.score += 40 + state.combo * 5;
+        state.combo += 1;
+        state.energy += 1;
+        floatingScore("+40");
+        setMessage("分類正確！堆肥魔法正在累積能量。", "😄");
+        updateUI();
+        if (state.dragCorrect === state.dragTotal) {
+          handleCorrect(null, levels[state.level].knowledge, true);
+        }
+      } else {
+        item.style.background = "#ffe0d8";
+        state.combo = 0;
+        state.lives -= 1;
+        setMessage("分類錯誤！生廚餘偏濕，枯葉碎枝偏乾，兩種要互相配合。", "🤔");
+        updateUI();
+        if (state.lives <= 0) endGame(false);
+      }
+    }
+
+    function handleCorrect(button, knowledge, fromDrag = false) {
+      state.answered = true;
+      clearInterval(state.timer);
+      const timeBonus = state.time * 5;
+      const comboBonus = state.combo * 20;
+      const base = fromDrag ? 120 : 180;
+      state.score += base + timeBonus + comboBonus;
+      state.combo += 1;
+      state.energy += fromDrag ? 2 : 1;
+      if (button) button.classList.add("correct");
+      floatingScore(`+${base + timeBonus + comboBonus}`);
+      setMessage(`答對了！${knowledge} 本關完成，獲得時間加成與連擊加成。`, "🌟");
+      updateUI();
+      nextBtn.classList.remove("hidden");
+      if (state.level === levels.length - 1) {
+        nextBtn.textContent = "完成挑戰";
+      } else {
+        nextBtn.textContent = "下一關";
+      }
+    }
+
+    function handleWrong(button, text, timeout) {
+      if (state.answered && !timeout) return;
+      state.combo = 0;
+      state.lives -= 1;
+      if (button) button.classList.add("wrong");
+      setMessage(text, "🤔");
+      updateUI();
+      if (state.lives <= 0) {
+        setTimeout(() => endGame(false), 450);
+        return;
+      }
+      if (timeout) {
+        state.answered = true;
+        nextBtn.textContent = "重新挑戰本關";
+        nextBtn.classList.remove("hidden");
+      }
+    }
+
+    function nextLevel() {
+      if (!state.answered) return;
+      if (state.level >= levels.length - 1) {
+        endGame(true);
+        return;
+      }
+      state.level += 1;
+      renderLevel();
+    }
+
+    function floatingScore(text) {
+      const span = document.createElement("div");
+      span.className = "floating-score";
+      span.textContent = text;
+      span.style.left = `${Math.random() * 50 + 25}%`;
+      span.style.top = `${Math.random() * 25 + 40}%`;
+      document.body.appendChild(span);
+      setTimeout(() => span.remove(), 850);
+    }
+
+    function confetti() {
+      const emojis = ["🌱", "🥬", "🍂", "✨", "🪱", "🏆", "🌍"];
+      for (let i = 0; i < 45; i++) {
+        const piece = document.createElement("div");
+        piece.className = "confetti";
+        piece.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        piece.style.left = `${Math.random() * 100}vw`;
+        piece.style.animationDelay = `${Math.random() * 0.45}s`;
+        document.body.appendChild(piece);
+        setTimeout(() => piece.remove(), 2400);
+      }
+    }
+
+    function resetGame() {
+      clearInterval(state.timer);
+      state.level = 0;
+      state.score = 0;
+      state.combo = 0;
+      state.energy = 0;
+      state.lives = 3;
+      state.time = 30;
+      state.running = false;
+      state.answered = false;
+      nextBtn.classList.add("hidden");
+      startBtn.classList.remove("hidden");
+      startBtn.textContent = "開始挑戰";
+      nextBtn.textContent = "下一關";
+      choicesEl.innerHTML = "";
+      draggableList.innerHTML = "";
+      dragZone.style.display = "none";
+      choicesEl.style.display = "grid";
+      levelPill.textContent = "第 1 關｜土地";
+      missionTitle.textContent = "準備開始";
+      missionText.textContent = "請按下開始，進入黑金魔法挑戰。";
+      setMessage("歡迎來到黑金魔法術！你的任務是讓食物循環回到土地，變成新的生命能量。", "🧙");
+      updateUI();
+    }
+
+    function endGame(success) {
+      clearInterval(state.timer);
+      state.running = false;
+      const title = success ? "🏆 黑金魔法成功！" : "💪 魔法能量用完了";
+      const rank = getRankName(state.score);
+      $("endTitle").textContent = title;
+      $("endSummary").innerHTML = `${state.player} 的總分是 <strong>${state.score}</strong> 分，稱號：<strong>${rank}</strong><br>你已學會「土地 → 菜園 → 食材 → 餐桌 → 生廚餘 → 堆肥 → 土地」的永續循環。`;
+      saveRank(state.player, state.score, rank);
+      renderRanks();
+      $("endModal").classList.remove("hidden");
+      if (success) confetti();
+    }
+
+    function getRankName(score) {
+      if (score >= 2600) return "傳說級黑金魔法師";
+      if (score >= 2000) return "校園永續大使";
+      if (score >= 1500) return "堆肥魔法達人";
+      if (score >= 900) return "惜食小農夫";
+      return "永續見習生";
+    }
+
+    function saveRank(name, score, rank) {
+      const list = JSON.parse(localStorage.getItem("blackGoldRanks") || "[]");
+      list.push({ name, score, rank, date: new Date().toLocaleDateString("zh-TW") });
+      list.sort((a, b) => b.score - a.score);
+      localStorage.setItem("blackGoldRanks", JSON.stringify(list.slice(0, 5)));
+    }
+
+    function renderRanks() {
+      const list = JSON.parse(localStorage.getItem("blackGoldRanks") || "[]");
+      const rankList = $("rankList");
+      rankList.innerHTML = "";
+      if (list.length === 0) {
+        rankList.innerHTML = `<div class="rank-item"><span>尚無紀錄</span><span>---</span></div>`;
+        return;
+      }
+      list.forEach((item, index) => {
+        const row = document.createElement("div");
+        row.className = "rank-item";
+        row.innerHTML = `<span>${index + 1}. ${item.name}<br><small>${item.rank}</small></span><span>${item.score}</span>`;
+        rankList.appendChild(row);
+      });
+    }
+
+    startBtn.addEventListener("click", renderLevel);
+    nextBtn.addEventListener("click", nextLevel);
+    restartBtn.addEventListener("click", resetGame);
+    $("playAgain").addEventListener("click", () => {
+      $("endModal").classList.add("hidden");
+      resetGame();
+      renderLevel();
+    });
+    $("modalStart").addEventListener("click", () => {
+      const name = $("playerName").value.trim();
+      state.player = name || "小魔法師";
+      $("startModal").classList.add("hidden");
+      resetGame();
+      renderLevel();
+    });
+    $("playerName").addEventListener("keydown", (event) => {
+      if (event.key === "Enter") $("modalStart").click();
+    });
+
+    renderRanks();
+    resetGame();
+  </script>
+</body>
+</html>
