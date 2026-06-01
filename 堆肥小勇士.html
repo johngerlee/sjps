@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>堆肥小勇士｜生廚餘堆肥競賽遊戲</title>
+<style>
+  :root{
+    --green:#2e7d32;
+    --light:#f1f8e9;
+    --soil:#795548;
+    --gold:#ffca28;
+    --red:#e53935;
+    --blue:#039be5;
+    --orange:#fb8c00;
+    --card:#ffffff;
+    --text:#263238;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:"Noto Sans TC","Microsoft JhengHei",Arial,sans-serif;
+    background:linear-gradient(180deg,#e8f5e9 0%,#fffde7 100%);
+    color:var(--text);
+  }
+  header{
+    background:linear-gradient(135deg,#2e7d32,#66bb6a);
+    color:#fff;
+    padding:18px 16px;
+    text-align:center;
+    box-shadow:0 3px 12px rgba(0,0,0,.18);
+  }
+  header h1{margin:0;font-size:30px}
+  header p{margin:8px 0 0;font-size:15px}
+  .wrap{
+    max-width:1160px;
+    margin:18px auto;
+    padding:0 14px 28px;
+  }
+  .topbar{
+    display:grid;
+    grid-template-columns:repeat(6,1fr);
+    gap:10px;
+    margin-bottom:14px;
+  }
+  .stat{
+    background:var(--card);
+    border-radius:16px;
+    padding:12px;
+    text-align:center;
+    box-shadow:0 3px 10px rgba(0,0,0,.1);
+    border:2px solid #dcedc8;
+  }
+  .stat b{display:block;font-size:22px;color:var(--green)}
+  .panel{
+    background:rgba(255,255,255,.96);
+    border-radius:20px;
+    padding:18px;
+    box-shadow:0 5px 18px rgba(0,0,0,.12);
+    border:2px solid #dcedc8;
+  }
+  .game-grid{
+    display:grid;
+    grid-template-columns:1.15fr .85fr;
+    gap:16px;
+  }
+  .level-title{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:10px;
+  }
+  .level-title h2{margin:0;color:var(--green)}
+  .timer{
+    background:#fff3e0;
+    color:#e65100;
+    border:2px solid #ffcc80;
+    padding:8px 12px;
+    border-radius:99px;
+    font-weight:800;
+  }
+  .instruction{
+    background:#e8f5e9;
+    border-left:7px solid var(--green);
+    padding:12px 14px;
+    border-radius:12px;
+    line-height:1.65;
+    margin:10px 0 16px;
+  }
+  .btn{
+    appearance:none;
+    border:0;
+    border-radius:14px;
+    padding:11px 16px;
+    background:var(--green);
+    color:#fff;
+    font-weight:800;
+    cursor:pointer;
+    box-shadow:0 3px 0 #1b5e20;
+    transition:.12s;
+    font-size:16px;
+  }
+  .btn:hover{transform:translateY(-1px)}
+  .btn:active{transform:translateY(2px);box-shadow:0 1px 0 #1b5e20}
+  .btn.secondary{background:#607d8b;box-shadow:0 3px 0 #37474f}
+  .btn.gold{background:#f9a825;box-shadow:0 3px 0 #f57f17;color:#3e2723}
+  .btn.red{background:#e53935;box-shadow:0 3px 0 #b71c1c}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+  .cards{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(138px,1fr));
+    gap:10px;
+  }
+  .card{
+    background:#fff;
+    border:3px solid #c8e6c9;
+    border-radius:18px;
+    padding:12px;
+    min-height:98px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    cursor:pointer;
+    user-select:none;
+    transition:.15s;
+    font-weight:800;
+    position:relative;
+  }
+  .card .emoji{font-size:35px;margin-bottom:5px}
+  .card:hover{transform:translateY(-3px);border-color:#66bb6a}
+  .card.selected{
+    outline:5px solid rgba(255,202,40,.65);
+    border-color:#f9a825;
+    background:#fffde7;
+  }
+  .card.correct{border-color:#2e7d32;background:#e8f5e9}
+  .card.wrong{border-color:#e53935;background:#ffebee}
+  .dropzones{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+  }
+  .zone{
+    min-height:210px;
+    border:3px dashed #a5d6a7;
+    border-radius:18px;
+    padding:12px;
+    background:#fbfff8;
+  }
+  .zone h3{margin:0 0 8px;color:#2e7d32}
+  .zone small{display:block;margin-bottom:10px;color:#546e7a}
+  .pile{
+    min-height:160px;
+    background:
+      radial-gradient(circle at 20% 20%,rgba(255,255,255,.38),transparent 25%),
+      linear-gradient(145deg,#8d6e63,#5d4037);
+    color:white;
+    border-radius:22px;
+    padding:16px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    border:6px solid #4e342e;
+  }
+  .pile .big{font-size:46px}
+  .meters{
+    display:grid;
+    gap:12px;
+  }
+  .meter label{font-weight:800;display:flex;justify-content:space-between}
+  .bar{
+    height:24px;
+    background:#eceff1;
+    border-radius:99px;
+    overflow:hidden;
+    border:2px solid #cfd8dc;
+  }
+  .fill{
+    height:100%;
+    width:50%;
+    background:linear-gradient(90deg,#81c784,#2e7d32);
+    transition:.25s;
+  }
+  .feedback{
+    min-height:54px;
+    padding:12px;
+    border-radius:14px;
+    background:#f5f5f5;
+    line-height:1.55;
+    margin-top:12px;
+    font-weight:700;
+  }
+  .feedback.good{background:#e8f5e9;color:#1b5e20}
+  .feedback.bad{background:#ffebee;color:#b71c1c}
+  .feedback.info{background:#e3f2fd;color:#01579b}
+  .badges{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .badge{
+    background:#eceff1;
+    color:#607d8b;
+    padding:8px 10px;
+    border-radius:99px;
+    font-weight:800;
+    border:2px solid #cfd8dc;
+  }
+  .badge.on{
+    background:#fff8e1;
+    color:#e65100;
+    border-color:#ffca28;
+  }
+  .quiz-options{
+    display:grid;
+    gap:10px;
+  }
+  .rank{
+    width:100%;
+    border-collapse:collapse;
+    overflow:hidden;
+    border-radius:12px;
+  }
+  .rank th,.rank td{
+    padding:9px;
+    border-bottom:1px solid #e0e0e0;
+    text-align:left;
+  }
+  .rank th{background:#e8f5e9;color:#1b5e20}
+  .mini-note{
+    font-size:13px;
+    color:#546e7a;
+    line-height:1.5;
+  }
+  .modal{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.55);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:20;
+    padding:16px;
+  }
+  .modal.show{display:flex}
+  .modal-box{
+    max-width:760px;
+    width:100%;
+    background:white;
+    border-radius:24px;
+    padding:24px;
+    box-shadow:0 10px 35px rgba(0,0,0,.25);
+    border:5px solid #c8e6c9;
+  }
+  .modal-box h2{margin-top:0;color:#2e7d32}
+  .shake{animation:shake .25s linear}
+  @keyframes shake{
+    0%,100%{transform:translateX(0)}
+    25%{transform:translateX(-5px)}
+    75%{transform:translateX(5px)}
+  }
+  @media(max-width:860px){
+    .topbar{grid-template-columns:repeat(2,1fr)}
+    .game-grid{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>🌱 堆肥小勇士：生廚餘循環競賽</h1>
+  <p>把生廚餘變成黑金土！適合國小中、高年級的環境教育互動遊戲</p>
+</header>
+
+<div class="wrap">
+  <div class="topbar">
+    <div class="stat">分數<b id="score">0</b></div>
+    <div class="stat">關卡<b id="level">1</b></div>
+    <div class="stat">連擊<b id="combo">0</b></div>
+    <div class="stat">生命<b id="lives">3</b></div>
+    <div class="stat">知識星<b id="stars">0</b></div>
+    <div class="stat">最高分<b id="best">0</b></div>
+  </div>
+
+  <div class="game-grid">
+    <main class="panel">
+      <div class="level-title">
+        <h2 id="stageTitle">第 1 關：挑出可以堆肥的生廚餘</h2>
+        <div class="timer">⏱️ <span id="time">60</span> 秒</div>
+      </div>
+      <div id="instruction" class="instruction"></div>
+      <div id="gameArea"></div>
+      <div id="feedback" class="feedback info">按下「開始遊戲」準備挑戰！</div>
+      <div class="actions">
+        <button class="btn gold" id="startBtn" onclick="startGame()">開始遊戲</button>
+        <button class="btn secondary" onclick="showRules()">玩法說明</button>
+        <button class="btn red" onclick="resetAll()">重新挑戰</button>
+      </div>
+    </main>
+
+    <aside class="panel">
+      <h2 style="margin-top:0;color:#2e7d32;">🏆 成就徽章</h2>
+      <div class="badges">
+        <span class="badge" id="badge-sort">分類達人</span>
+        <span class="badge" id="badge-balance">配方高手</span>
+        <span class="badge" id="badge-water">濕度偵探</span>
+        <span class="badge" id="badge-air">翻堆隊長</span>
+        <span class="badge" id="badge-master">堆肥大師</span>
+      </div>
+      <hr>
+      <h2 style="color:#2e7d32;">📊 今日排行榜</h2>
+      <table class="rank">
+        <thead><tr><th>名次</th><th>稱號</th><th>分數</th></tr></thead>
+        <tbody id="rankBody"></tbody>
+      </table>
+      <p class="mini-note">
+        加分祕訣：答對越快、連擊越高，分數越多。每完成一個正確程序會得到知識星，集滿可解鎖「堆肥大師」。
+      </p>
+      <hr>
+      <h2 style="color:#2e7d32;">🧠 堆肥口訣</h2>
+      <p class="mini-note">
+        「切小、混乾、保濕、通風、等待熟成」：只要記住五個重點就好。生廚餘切小、加落葉碎紙、保持微濕、偶爾翻一翻，最後耐心等待變成黑金土。
+      </p>
+    </aside>
+  </div>
+</div>
+
+<div class="modal" id="rulesModal" onclick="closeRules(event)">
+  <div class="modal-box">
+    <h2>🌿 玩法說明</h2>
+    <p>你要在時間內完成生廚餘堆肥的基本程序：</p>
+    <ol>
+      <li><b>挑材料：</b>選出適合堆肥的生廚餘，避開油膩、肉骨、塑膠等不適合材料。</li>
+      <li><b>學程序：</b>依照「切小 → 混乾 → 保濕 → 通風 → 等待熟成」完成簡化流程，遊戲會給提示。</li>
+      <li><b>調配方：</b>綠色材料和棕色材料要平衡，避免太臭、太濕或分解太慢。</li>
+      <li><b>救堆肥：</b>依狀況選擇補乾料、加水、翻堆或等待熟成。</li>
+      <li><b>知識快問快答：</b>答對可以獲得大量加分。</li>
+    </ol>
+    <p><b>競賽加分：</b>答對 +100，連擊加成 +20、+40、+60……；快答可加時間獎勵；答錯會扣生命。生命歸零或時間歸零即結算。</p>
+    <button class="btn" onclick="document.getElementById('rulesModal').classList.remove('show')">我知道了</button>
+  </div>
+</div>
+
+<script>
+let score=0, level=1, combo=0, lives=3, stars=0, timeLeft=60, timer=null, started=false;
+let selectedCards=[];
+let compostState={green:0,brown:0,water:50,air:50};
+const bestKey="compostGameBestScoreV1";
+const rankKey="compostGameRanksV1";
+
+const items=[
+  {name:"香蕉皮",emoji:"🍌",ok:true,type:"green",why:"果皮是適合堆肥的綠色材料，但要切小並覆蓋乾料。"},
+  {name:"菜葉",emoji:"🥬",ok:true,type:"green",why:"菜葉含水量高，是綠色材料。"},
+  {name:"咖啡渣",emoji:"☕",ok:true,type:"green",why:"咖啡渣可堆肥，但一次不要放太厚。"},
+  {name:"蛋殼",emoji:"🥚",ok:true,type:"mineral",why:"蛋殼可壓碎後加入，能補充礦物質。"},
+  {name:"落葉",emoji:"🍂",ok:true,type:"brown",why:"落葉是棕色材料，可吸水並減少臭味。"},
+  {name:"碎紙箱",emoji:"📦",ok:true,type:"brown",why:"未上亮膜、少油墨的碎紙箱可當棕色材料。"},
+  {name:"魚骨肉塊",emoji:"🍖",ok:false,type:"bad",why:"肉類和魚骨容易發臭，也可能吸引動物。"},
+  {name:"油炸食物",emoji:"🍟",ok:false,type:"bad",why:"油膩食物會讓堆肥發臭、分解不良。"},
+  {name:"塑膠袋",emoji:"🛍️",ok:false,type:"bad",why:"塑膠不會變成堆肥，不能放入。"},
+  {name:"玻璃瓶",emoji:"🍾",ok:false,type:"bad",why:"玻璃不會分解，會造成危險。"},
+  {name:"茶葉渣",emoji:"🍵",ok:true,type:"green",why:"茶葉渣可以堆肥，但茶包若含塑膠纖維則要拆開。"},
+  {name:"乾稻草",emoji:"🌾",ok:true,type:"brown",why:"乾稻草能增加碳源和空隙。"}
+];
+
+const steps=[
+  {name:"切小生廚餘",emoji:"🔪",hint:"先把果皮、菜葉切小，微生物比較容易分解。"},
+  {name:"混入落葉或碎紙",emoji:"🍂",hint:"廚餘濕濕的，要加入乾乾的落葉或碎紙，才比較不臭。"},
+  {name:"保持微濕",emoji:"💧",hint:"濕度像擰乾的海綿最好，不要太乾，也不要滴水。"},
+  {name:"翻一翻讓空氣進去",emoji:"🔄",hint:"翻堆可以讓空氣進入，幫助微生物工作。"},
+  {name:"等待熟成變黑金土",emoji:"🌱",hint:"最後要給堆肥時間慢慢熟成，變成可以回到土地的黑金土。"}
+];
+
+const problems=[
+  {text:"堆肥聞起來很臭、表面濕黏，該怎麼做？", choices:["加入落葉或碎紙並翻堆","再倒一大桶水","加入更多魚骨","完全密封不理它"], ans:0, explain:"臭味通常代表太濕或缺氧，要加棕色乾料並翻堆通風。"},
+  {text:"堆肥很乾，材料幾乎沒有分解，該怎麼辦？", choices:["少量噴水並混合","加入塑膠袋","拿去太陽下烤更乾","停止翻堆"], ans:0, explain:"太乾會讓微生物活動變慢，要少量補水到像擰乾海綿。"},
+  {text:"看到很多小果蠅在廚餘附近，最好怎麼處理？", choices:["用乾葉或土覆蓋廚餘","加入更多水果皮在表面","把蓋子打開一整天","加很多鹽巴"], ans:0, explain:"新鮮廚餘不要裸露，覆蓋棕色材料可減少蟲和味道。"},
+  {text:"哪一種狀態最接近合適濕度？", choices:["像擰乾的海綿","像湯一樣流動","像沙漠一樣乾","結成硬石頭"], ans:0, explain:"合適堆肥濕度摸起來微濕，但不會滴水。"},
+  {text:"為什麼要把廚餘切小？", choices:["增加接觸面積，分解更快","讓它變得更臭","讓塑膠也能分解","只是為了好看"], ans:0, explain:"切小能讓微生物更容易分解材料。"}
+];
+
+function $(id){return document.getElementById(id)}
+function updateUI(){
+  $("score").textContent=score;
+  $("level").textContent=level;
+  $("combo").textContent=combo;
+  $("lives").textContent=lives;
+  $("stars").textContent=stars;
+  $("time").textContent=timeLeft;
+  $("best").textContent=localStorage.getItem(bestKey)||0;
+  if(stars>=2) $("badge-sort").classList.add("on");
+  if(stars>=4) $("badge-balance").classList.add("on");
+  if(stars>=6) $("badge-water").classList.add("on");
+  if(stars>=8) $("badge-air").classList.add("on");
+  if(stars>=10) $("badge-master").classList.add("on");
+}
+function setFeedback(text,type="info"){
+  const f=$("feedback");
+  f.className="feedback "+type;
+  f.innerHTML=text;
+}
+function addScore(base){
+  const bonus=combo*20;
+  score+=base+bonus;
+  setFeedback(`✅ 正確！獲得 ${base}+${bonus} 分，連擊 ${combo}！`,"good");
+}
+function wrong(msg){
+  combo=0;
+  lives--;
+  $("gameArea").classList.add("shake");
+  setTimeout(()=>$("gameArea").classList.remove("shake"),260);
+  setFeedback("❌ "+msg+" 生命 -1，連擊歸零。","bad");
+  if(lives<=0) endGame();
+}
+function startGame(){
+  if(started) return;
+  started=true;
+  score=0; level=1; combo=0; lives=3; stars=0; timeLeft=60;
+  compostState={green:0,brown:0,water:50,air:50};
+  $("startBtn").textContent="遊戲進行中";
+  updateUI();
+  timer=setInterval(()=>{
+    timeLeft--;
+    updateUI();
+    if(timeLeft<=0) endGame();
+  },1000);
+  renderLevel();
+}
+function resetAll(){
+  clearInterval(timer);
+  started=false;
+  score=0; level=1; combo=0; lives=3; stars=0; timeLeft=60;
+  compostState={green:0,brown:0,water:50,air:50};
+  $("startBtn").textContent="開始遊戲";
+  document.querySelectorAll(".badge").forEach(b=>b.classList.remove("on"));
+  setFeedback("已重置，按下「開始遊戲」重新挑戰！","info");
+  $("stageTitle").textContent="第 1 關：挑出可以堆肥的生廚餘";
+  $("instruction").innerHTML="";
+  $("gameArea").innerHTML="";
+  updateUI();
+  renderRanks();
+}
+function nextLevel(){
+  level++;
+  if(level>5) level=2+Math.floor(Math.random()*4);
+  renderLevel();
+  updateUI();
+}
+function renderLevel(){
+  selectedCards=[];
+  if(level===1) renderSort();
+  else if(level===2) renderSteps();
+  else if(level===3) renderBalance();
+  else if(level===4) renderRescue();
+  else renderQuiz();
+}
+function renderSort(){
+  $("stageTitle").textContent="第 1 關：堆肥材料快篩賽";
+  $("instruction").innerHTML="請選出 <b>可以放入生廚餘堆肥</b> 的材料。選滿 5 個後送出。小心：油膩食物、肉骨、塑膠、玻璃都不適合。";
+  const shuffled=[...items].sort(()=>Math.random()-0.5).slice(0,10);
+  $("gameArea").innerHTML=`<div class="cards">${shuffled.map((it,i)=>cardHTML(it,i)).join("")}</div>
+  <div class="actions"><button class="btn" onclick="checkSort()">送出答案</button></div>`;
+  window.currentItems=shuffled;
+}
+function cardHTML(it,i){
+  return `<div class="card" onclick="toggleCard(this,${i})"><div class="emoji">${it.emoji}</div>${it.name}</div>`;
+}
+function toggleCard(el,i){
+  if(!started) return;
+  el.classList.toggle("selected");
+  if(selectedCards.includes(i)) selectedCards=selectedCards.filter(x=>x!==i);
+  else selectedCards.push(i);
+}
+function checkSort(){
+  if(selectedCards.length<5){setFeedback("請至少選 5 個你認為可以堆肥的材料。","info");return;}
+  const chosen=selectedCards.map(i=>window.currentItems[i]);
+  const good=chosen.filter(x=>x.ok).length;
+  const bad=chosen.filter(x=>!x.ok).length;
+  if(bad===0 && good>=5){
+    combo++; stars+=2; addScore(220); timeLeft+=5; markBadge("badge-sort"); setTimeout(nextLevel,900);
+  }else{
+    const badNames=chosen.filter(x=>!x.ok).map(x=>x.name).join("、");
+    wrong(`這些不適合放入堆肥：${badNames || "有些選項需要再想想"}。`);
+  }
+  updateUI();
+}
+function renderSteps(){
+  $("stageTitle").textContent="第 2 關：堆肥五步驟提示挑戰";
+  $("instruction").innerHTML="這一關改成比較簡單的學習模式：請按照提示，找出下一個堆肥步驟。<b>答錯不會直接重來</b>，遊戲會給你提示。";
+  window.currentStepIndex=0;
+  const shuffled=[...steps].sort(()=>Math.random()-0.5);
+  window.shuffledSteps=shuffled;
+  $("gameArea").innerHTML=`
+    <div class="feedback info" id="hintBox"></div>
+    <div class="cards">${shuffled.map((s,i)=>`
+      <div class="card" id="stepCard${i}" onclick="pickStep(this,${i})">
+        <div class="emoji">${s.emoji}</div>${s.name}
+      </div>`).join("")}</div>
+    <div class="feedback good" id="learnBox">已完成：尚未開始</div>`;
+  updateStepHint();
+}
+function updateStepHint(){
+  const target=steps[window.currentStepIndex];
+  $("hintBox").innerHTML=`目前要找第 ${window.currentStepIndex+1} 步：<b>${target.hint}</b>`;
+}
+function pickStep(el,i){
+  const target=steps[window.currentStepIndex];
+  const chosen=window.shuffledSteps[i];
+  if(chosen.name===target.name){
+    el.classList.add("correct");
+    el.onclick=null;
+    combo++;
+    score+=120+combo*15;
+    stars+=1;
+    const done=steps.slice(0,window.currentStepIndex+1).map((s,k)=>`${k+1}. ${s.name}`).join("<br>");
+    $("learnBox").innerHTML="已完成：<br>"+done;
+    setFeedback(`✅ 很好！${target.hint}`,"good");
+    window.currentStepIndex++;
+    if(window.currentStepIndex>=steps.length){
+      stars+=1;
+      timeLeft+=8;
+      setFeedback("🎉 五個基本程序完成！記住：切小、混乾、保濕、通風、等待熟成。","good");
+      setTimeout(nextLevel,1100);
+    }else{
+      updateStepHint();
+    }
+  }else{
+    score=Math.max(0,score-20);
+    combo=0;
+    el.classList.add("wrong");
+    setTimeout(()=>el.classList.remove("wrong"),450);
+    setFeedback(`💡 再想想：現在不是「${chosen.name}」。提示：${target.hint}`,"info");
+  }
+  updateUI();
+}
+function renderBalance(){
+  $("stageTitle").textContent="第 3 關：碳氮平衡配方賽";
+  $("instruction").innerHTML="這一關只要記住：<b>濕廚餘要搭配乾材料</b>。請加入至少 1 份綠色材料、2 份棕色材料，並讓濕度與空氣不要太極端即可。";
+  compostState={green:0,brown:0,water:45+Math.floor(Math.random()*20),air:45};
+  const options=[
+    {name:"菜葉 +1",emoji:"🥬",g:1,b:0,w:12,a:-3},
+    {name:"果皮 +1",emoji:"🍎",g:1,b:0,w:10,a:-2},
+    {name:"落葉 +1",emoji:"🍂",g:0,b:1,w:-8,a:8},
+    {name:"碎紙 +1",emoji:"📦",g:0,b:1,w:-10,a:7},
+    {name:"少量噴水",emoji:"💧",g:0,b:0,w:12,a:0},
+    {name:"翻堆通風",emoji:"🔄",g:0,b:0,w:-3,a:18}
+  ];
+  window.balanceOptions=options;
+  $("gameArea").innerHTML=`
+    <div class="cards">${options.map((o,i)=>`<div class="card" onclick="addMaterial(${i})"><div class="emoji">${o.emoji}</div>${o.name}</div>`).join("")}</div>
+    <hr>
+    <div class="meters">
+      ${meterHTML("綠色材料", "greenMeter", 0)}
+      ${meterHTML("棕色材料", "brownMeter", 0)}
+      ${meterHTML("濕度", "waterMeter", compostState.water)}
+      ${meterHTML("空氣", "airMeter", compostState.air)}
+    </div>
+    <div class="actions"><button class="btn" onclick="checkBalance()">完成配方</button></div>`;
+  refreshMeters();
+}
+function meterHTML(label,id,val){
+  return `<div class="meter"><label>${label}<span id="${id}Text">${val}</span></label><div class="bar"><div class="fill" id="${id}" style="width:${val}%"></div></div></div>`;
+}
+function addMaterial(i){
+  const o=window.balanceOptions[i];
+  compostState.green+=o.g;
+  compostState.brown+=o.b;
+  compostState.water=Math.max(0,Math.min(100,compostState.water+o.w));
+  compostState.air=Math.max(0,Math.min(100,compostState.air+o.a));
+  refreshMeters();
+}
+function refreshMeters(){
+  const greenPct=Math.min(100,compostState.green*20);
+  const brownPct=Math.min(100,compostState.brown*20);
+  $("greenMeter").style.width=greenPct+"%"; $("greenMeterText").textContent=compostState.green+" 份";
+  $("brownMeter").style.width=brownPct+"%"; $("brownMeterText").textContent=compostState.brown+" 份";
+  $("waterMeter").style.width=compostState.water+"%"; $("waterMeterText").textContent=compostState.water;
+  $("airMeter").style.width=compostState.air+"%"; $("airMeterText").textContent=compostState.air;
+}
+function checkBalance(){
+  const okBrown=compostState.brown>=2;
+  const okGreen=compostState.green>=1 && compostState.green<=4;
+  const okWater=compostState.water>=30 && compostState.water<=80;
+  const okAir=compostState.air>=30 && compostState.air<=90;
+  if(okBrown && okGreen && okWater && okAir){
+    combo++; stars+=2; markBadge("badge-balance"); addScore(300); timeLeft+=7; setTimeout(nextLevel,900);
+  }else{
+    let msg="配方還不穩定：";
+    if(!okBrown) msg+="請再加一點落葉或碎紙；";
+    if(!okGreen) msg+="至少要有一點果皮或菜葉；";
+    if(!okWater) msg+="濕度太乾或太濕，試試噴水或加乾料；";
+    if(!okAir) msg+="空氣太少，試試翻堆；";
+    wrong(msg);
+  }
+  updateUI();
+}
+function renderRescue(){
+  $("stageTitle").textContent="第 4 關：救救我的堆肥桶";
+  $("instruction").innerHTML="讀懂堆肥桶的狀況，選出最適合的處理方法。";
+  const p=problems[Math.floor(Math.random()*problems.length)];
+  window.currentProblem=p;
+  $("gameArea").innerHTML=`
+    <div class="pile"><div class="big">🪱</div><h2>${p.text}</h2></div>
+    <div class="quiz-options" style="margin-top:14px;">
+    ${p.choices.map((c,i)=>`<button class="btn secondary" onclick="answerProblem(${i})">${c}</button>`).join("")}
+    </div>`;
+}
+function answerProblem(i){
+  const p=window.currentProblem;
+  if(i===p.ans){
+    combo++; stars+=2; markBadge("badge-water"); markBadge("badge-air"); addScore(280); timeLeft+=6;
+    setFeedback(`✅ ${p.explain}`,"good");
+    setTimeout(nextLevel,900);
+  }else{
+    wrong(`不是最佳處理。提示：${p.explain}`);
+  }
+  updateUI();
+}
+function renderQuiz(){
+  $("stageTitle").textContent="第 5 關：堆肥知識搶答賽";
+  $("instruction").innerHTML="選出最正確答案。這關會隨機出題，適合班級分組競賽。";
+  renderRescue();
+  $("stageTitle").textContent="第 5 關：堆肥知識搶答賽";
+}
+function markBadge(id){$(id).classList.add("on");}
+function endGame(){
+  clearInterval(timer);
+  started=false;
+  $("startBtn").textContent="再玩一次";
+  let best=Number(localStorage.getItem(bestKey)||0);
+  if(score>best)localStorage.setItem(bestKey,score);
+  saveRank(score);
+  renderRanks();
+  const title=score>=2200?"🌟 超級堆肥大師":score>=1500?"🏆 堆肥高手":score>=900?"🌱 循環小勇士":"🍂 堆肥見習生";
+  $("gameArea").innerHTML=`
+    <div class="pile">
+      <div class="big">🎉</div>
+      <h2>${title}</h2>
+      <p>你的分數：${score}</p>
+      <p>獲得知識星：${stars}</p>
+      <p>學會重點：生廚餘要瀝乾切小、搭配棕色乾料、保持微濕、定期翻堆。</p>
+    </div>`;
+  setFeedback("遊戲結束！可以請下一組挑戰，看看誰能拿到最高分。","info");
+  updateUI();
+}
+function saveRank(s){
+  const ranks=JSON.parse(localStorage.getItem(rankKey)||"[]");
+  const title=s>=2200?"超級堆肥大師":s>=1500?"堆肥高手":s>=900?"循環小勇士":"堆肥見習生";
+  ranks.push({title,score:s});
+  ranks.sort((a,b)=>b.score-a.score);
+  localStorage.setItem(rankKey,JSON.stringify(ranks.slice(0,5)));
+}
+function renderRanks(){
+  const ranks=JSON.parse(localStorage.getItem(rankKey)||"[]");
+  const defaults=[
+    {title:"示範隊：落葉隊",score:1200},
+    {title:"示範隊：菜葉隊",score:900},
+    {title:"示範隊：蚯蚓隊",score:700}
+  ];
+  const show=(ranks.length?ranks:defaults).slice(0,5);
+  $("rankBody").innerHTML=show.map((r,i)=>`<tr><td>${i+1}</td><td>${r.title}</td><td>${r.score}</td></tr>`).join("");
+}
+function showRules(){ $("rulesModal").classList.add("show");}
+function closeRules(e){ if(e.target.id==="rulesModal") $("rulesModal").classList.remove("show");}
+renderRanks();
+updateUI();
+$("instruction").innerHTML="按下開始後，請在時間內完成材料分類、五步驟提示挑戰、簡易配方調整與知識搶答。適合投影到大螢幕進行小組競賽。";
+</script>
+</body>
+</html>
